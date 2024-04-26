@@ -1,14 +1,11 @@
 {
   "description": "Personal extension for taking notes on YouTube videos",
   "manifest_version": 2,
-  "permissions": [],
-  "name": "NotesWithTimestamp",
-  "version": "1",
-  "content_scripts": [
-    {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["code.js"],
-      "css": ["style.css"]
-    }
-  ]
+  "name": "Notes With Timestamp",
+  "version": "1.0",
+  "sidebar_action": {
+    "default_title": "Notes with Timestamp",
+    "default_panel": "sidebar/panel.html"
+  },
+  "permissions": ["storage", "tabs"]
 }
