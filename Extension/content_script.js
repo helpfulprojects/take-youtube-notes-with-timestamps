@@ -1,5 +1,7 @@
 browser.runtime.onMessage.addListener((request) => {
-  console.log("Message from the sidebar:");
-  console.log(request.greeting);
-  return Promise.resolve({ response: "Hi from content script" });
+  if (request.action === "getTime") {
+    return Promise.resolve({
+      time: document.querySelector("video").currentTime,
+    });
+  }
 });
