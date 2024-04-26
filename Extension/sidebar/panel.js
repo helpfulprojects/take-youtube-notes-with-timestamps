@@ -1,11 +1,21 @@
 let myWindowId;
 const currentMark = document.querySelector("#currentMark");
+const markings = document.querySelector("#markings");
 
 currentMark.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
-    console.log("Enter key pressed!");
+    if (currentMark.value === "") return;
+    const marking = createMarking(currentMark.value);
+    markings.appendChild(marking);
+    currentMark.value = "";
   }
 });
+
+function createMarking(value) {
+  const marking = document.createElement("li");
+  marking.innerText = value;
+  return marking;
+}
 
 function updateContent() {
   browser.tabs
