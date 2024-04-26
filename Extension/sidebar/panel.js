@@ -23,7 +23,8 @@ markingsHtml.addEventListener("mousedown", (event) => {
             marking.title = newTitle;
           }
         } else {
-          setVideoTime(marking.time);
+          let newTime = Math.max(0, marking.time - 5);
+          setVideoTime(newTime);
         }
         updateMarkingsHtml();
         updateLocalStorage();
