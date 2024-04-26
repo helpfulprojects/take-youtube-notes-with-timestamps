@@ -1,5 +1,5 @@
 let myWindowId;
-const currentMark = document.querySelector("#currentMark");
+const currentMarkingHtml = document.querySelector("#currentMark");
 const markingsHtml = document.querySelector("#markings");
 let markings = [];
 let previousInputLength = 0;
@@ -7,18 +7,34 @@ const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
 
 markingsHtml.addEventListener("mousedown", (event) => {
-  if (event.which === 1 && event.target.tagName === "BUTTON") {
+  if (event.which === 1 && event.target.className === "title") {
     let time = parseFloat(event.target.dataset.time);
-    markings = markings.filter((marking) => marking.time != time);
-    updateMarkingsHtml();
-    updateLocalStorage();
+    markings.forEach((marking) => {
+      if (marking.time == time) {
+        if (event.ctrlKey) {
+          let shouldDelete = confirm(
+            "Are you sure you want to delete: " + marking.title
+          );
+          if (!shouldDelete) return;
+          markings = markings.filter((marking) => marking.time != time);
+        } else if (event.shiftKey) {
+          let newTitle = prompt("New title for: " + marking.title);
+          if (newTitle) {
+            marking.title = newTitle;
+          }
+        }
+        updateMarkingsHtml();
+        updateLocalStorage();
+      }
+    });
+    return;
   }
 });
 
-currentMark.addEventListener("keydown", (event) => {
+currentMarkingHtml.addEventListener("keydown", (event) => {
   previousInputLength = event.target.value.length;
 });
-currentMark.addEventListener("keyup", (event) => {
+currentMarkingHtml.addEventListener("keyup", (event) => {
   const startWritingMarking =
     event.target.value.length === 1 && previousInputLength == 0;
   if (startWritingMarking) {
@@ -26,11 +42,14 @@ currentMark.addEventListener("keyup", (event) => {
   }
   if (event.key === "Enter") {
     if (
-      currentMark.value === "" ||
+      currentMarkingHtml.value === "" ||
       timeStartWritingMarking === INVALID_START_TIME
     )
       return;
-    markings.push({ title: currentMark.value, time: timeStartWritingMarking });
+    markings.push({
+      title: currentMarkingHtml.value,
+      time: timeStartWritingMarking,
+    });
     markings.sort(function (x, y) {
       if (x.time < y.time) {
         return -1;
@@ -42,7 +61,7 @@ currentMark.addEventListener("keyup", (event) => {
     });
     updateMarkingsHtml();
     updateLocalStorage();
-    currentMark.value = "";
+    currentMarkingHtml.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
   }
 });
@@ -67,12 +86,6 @@ function updateTimeStarted() {
 }
 
 function createMarking(value, seconds) {
-  const btnDelete = document.createElement("button");
-  btnDelete.innerText = "X";
-  btnDelete.dataset.time = seconds;
-  const btnEdit = document.createElement("button");
-  btnEdit.innerText = "Edit";
-  btnEdit.dataset.time = seconds;
   const marking = document.createElement("li");
   const time = document.createElement("p");
   time.className = "time";
@@ -83,8 +96,7 @@ function createMarking(value, seconds) {
   const title = document.createElement("p");
   title.className = "title";
   title.innerText = value;
-  marking.appendChild(btnDelete);
-  marking.appendChild(btnEdit);
+  title.dataset.time = seconds;
   marking.appendChild(time);
   marking.appendChild(title);
   return marking;

@@ -4,6 +4,8 @@ html, body {
   margin: 0;
   background-color: black;
   box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 li {
@@ -36,6 +38,7 @@ button{
 }
 
 #markings {
+  padding-left:0px;
   color: white;
   font-size: 15px;
   width: 400px;
