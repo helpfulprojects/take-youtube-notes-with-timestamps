@@ -21,6 +21,15 @@ currentMark.addEventListener("keyup", (event) => {
     )
       return;
     markings.push({ title: currentMark.value, time: timeStartWritingMarking });
+    markings.sort(function (x, y) {
+      if (x.time < y.time) {
+        return -1;
+      }
+      if (x.time > y.time) {
+        return 1;
+      }
+      return 0;
+    });
     updateMarkingsHtml();
     currentMark.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
