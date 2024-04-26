@@ -53,6 +53,10 @@ function updateTimeStarted() {
 }
 
 function createMarking(value, seconds) {
+  const btnDelete = document.createElement("button");
+  btnDelete.innerText = "X";
+  const btnEdit = document.createElement("button");
+  btnEdit.innerText = "Edit";
   const marking = document.createElement("li");
   const time = document.createElement("p");
   time.className = "time";
@@ -63,6 +67,8 @@ function createMarking(value, seconds) {
   const title = document.createElement("p");
   title.className = "title";
   title.innerText = value;
+  marking.appendChild(btnDelete);
+  marking.appendChild(btnEdit);
   marking.appendChild(time);
   marking.appendChild(title);
   return marking;
