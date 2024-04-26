@@ -1,6 +1,7 @@
 let myWindowId;
 const currentMark = document.querySelector("#currentMark");
-const markings = document.querySelector("#markings");
+const markingsHtml = document.querySelector("#markings");
+let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
@@ -19,11 +20,15 @@ currentMark.addEventListener("keyup", (event) => {
       timeStartWritingMarking === INVALID_START_TIME
     )
       return;
-    console.log(timeStartWritingMarking);
-    const marking = createMarking(currentMark.value, timeStartWritingMarking);
-    markings.appendChild(marking);
+    markings.push({ title: currentMark.value, time: timeStartWritingMarking });
+    updateMarkingsHtml();
     currentMark.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
+    browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
+      let contentToStore = {};
+      contentToStore[tabs[0].url] = JSON.stringify(markings);
+      browser.storage.local.set(contentToStore);
+    });
   }
 });
 
@@ -59,8 +64,19 @@ function updateContent() {
       return browser.storage.local.get(tabs[0].url);
     })
     .then((storedInfo) => {
-      //contentBox.innerText = storedInfo[Object.keys(storedInfo)[0]];
+      markingsHtml.innerHTML = "";
+      if (!storedInfo[Object.keys(storedInfo)[0]]) return;
+      markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
+      updateMarkingsHtml();
     });
+}
+
+function updateMarkingsHtml() {
+  markingsHtml.innerHTML = "";
+  markings.forEach((marking) => {
+    const markingHtml = createMarking(marking.title, marking.time);
+    markingsHtml.appendChild(markingHtml);
+  });
 }
 
 browser.tabs.onActivated.addListener(updateContent);
