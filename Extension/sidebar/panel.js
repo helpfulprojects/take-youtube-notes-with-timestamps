@@ -1,7 +1,6 @@
 let myWindowId;
 const currentMark = document.querySelector("#currentMark");
 const markings = document.querySelector("#markings");
-let markingsToAdd = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
@@ -21,8 +20,8 @@ currentMark.addEventListener("keyup", (event) => {
     )
       return;
     console.log(timeStartWritingMarking);
-    const marking = createMarking(currentMark.value);
-    markingsToAdd.push(marking);
+    const marking = createMarking(currentMark.value, timeStartWritingMarking);
+    markings.appendChild(marking);
     currentMark.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
   }
@@ -39,9 +38,17 @@ function updateTimeStarted() {
   });
 }
 
-function createMarking(value) {
+function createMarking(value, seconds) {
   const marking = document.createElement("li");
-  marking.innerText = value;
+  const time = document.createElement("a");
+  let date = new Date(0);
+  date.setSeconds(seconds);
+  let formatedSeconds = date.toISOString().substring(11, 19);
+  time.innerText = formatedSeconds + ": ";
+  const title = document.createElement("p");
+  title.innerText = value;
+  marking.appendChild(time);
+  marking.appendChild(title);
   return marking;
 }
 
