@@ -7,5 +7,11 @@
     "default_title": "Notes with Timestamp",
     "default_panel": "sidebar/panel.html"
   },
-  "permissions": ["storage", "tabs"]
+  "permissions": ["storage", "tabs"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content_script.js"]
+    }
+  ]
 }

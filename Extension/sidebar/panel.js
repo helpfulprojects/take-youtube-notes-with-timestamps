@@ -1,13 +1,22 @@
 let myWindowId;
 const currentMark = document.querySelector("#currentMark");
 const markings = document.querySelector("#markings");
+let markingsToAdd = [];
 
 currentMark.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     if (currentMark.value === "") return;
     const marking = createMarking(currentMark.value);
-    markings.appendChild(marking);
+    markingsToAdd.push(marking);
     currentMark.value = "";
+    browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
+      browser.tabs
+        .sendMessage(tabs[0].id, { greeting: "Hi from background script" })
+        .then((response) => {
+          console.log("Message from the content script:");
+          console.log(response.response);
+        });
+    });
   }
 });
 
