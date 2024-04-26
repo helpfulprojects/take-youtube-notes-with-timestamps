@@ -54,12 +54,14 @@ function updateTimeStarted() {
 
 function createMarking(value, seconds) {
   const marking = document.createElement("li");
-  const time = document.createElement("a");
+  const time = document.createElement("p");
+  time.className = "time";
   let date = new Date(0);
   date.setSeconds(seconds);
   let formatedSeconds = date.toISOString().substring(11, 19);
   time.innerText = formatedSeconds + ": ";
   const title = document.createElement("p");
+  title.className = "title";
   title.innerText = value;
   marking.appendChild(time);
   marking.appendChild(title);

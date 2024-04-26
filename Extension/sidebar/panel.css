@@ -2,6 +2,7 @@ html, body {
   height: 100%;
   width: 100%;
   margin: 0;
+  background-color: black;
   box-sizing: border-box;
 }
 
@@ -9,4 +10,28 @@ li {
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.time{
+  font-size: 13px;
+  font-weight: lighter;
+}
+
+.title{
+  cursor: pointer;
+  margin-left: 8px
+}
+
+p{
+  margin:0px
+}
+
+#markings {
+  color: white;
+  font-size: 15px;
+  width: 400px;
+  height: 90vh;
+  overflow: auto;
+  margin-bottom: 5px;
+  font-family: Roboto, Arial, sans-serif
 }
