@@ -22,6 +22,8 @@ markingsHtml.addEventListener("mousedown", (event) => {
           if (newTitle) {
             marking.title = newTitle;
           }
+        } else {
+          setVideoTime(marking.time);
         }
         updateMarkingsHtml();
         updateLocalStorage();
@@ -82,6 +84,12 @@ function updateTimeStarted() {
         console.log("Got response", response);
         timeStartWritingMarking = parseFloat(response.time);
       });
+  });
+}
+
+function setVideoTime(seconds) {
+  browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
+    browser.tabs.sendMessage(tabs[0].id, { action: "setTime", value: seconds });
   });
 }
 

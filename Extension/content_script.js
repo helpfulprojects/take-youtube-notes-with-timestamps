@@ -3,5 +3,7 @@ browser.runtime.onMessage.addListener((request) => {
     return Promise.resolve({
       time: document.querySelector("video").currentTime,
     });
+  } else if (request.action === "setTime") {
+    document.querySelector("video").currentTime = parseFloat(request.value);
   }
 });
