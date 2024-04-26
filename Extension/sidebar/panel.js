@@ -64,6 +64,7 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
     updateMarkingsHtml();
     updateLocalStorage();
     currentMarkingHtml.value = "";
+    previousInputLength = 0;
     timeStartWritingMarking = INVALID_START_TIME;
   }
 });
