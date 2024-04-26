@@ -5,6 +5,16 @@ let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
+
+markingsHtml.addEventListener("mousedown", (event) => {
+  if (event.which === 1 && event.target.tagName === "BUTTON") {
+    let time = parseFloat(event.target.dataset.time);
+    markings = markings.filter((marking) => marking.time != time);
+    updateMarkingsHtml();
+    updateLocalStorage();
+  }
+});
+
 currentMark.addEventListener("keydown", (event) => {
   previousInputLength = event.target.value.length;
 });
@@ -31,15 +41,19 @@ currentMark.addEventListener("keyup", (event) => {
       return 0;
     });
     updateMarkingsHtml();
+    updateLocalStorage();
     currentMark.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
-    browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
-      let contentToStore = {};
-      contentToStore[tabs[0].url] = JSON.stringify(markings);
-      browser.storage.local.set(contentToStore);
-    });
   }
 });
+
+function updateLocalStorage() {
+  browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
+    let contentToStore = {};
+    contentToStore[tabs[0].url] = JSON.stringify(markings);
+    browser.storage.local.set(contentToStore);
+  });
+}
 
 function updateTimeStarted() {
   browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
@@ -55,8 +69,10 @@ function updateTimeStarted() {
 function createMarking(value, seconds) {
   const btnDelete = document.createElement("button");
   btnDelete.innerText = "X";
+  btnDelete.dataset.time = seconds;
   const btnEdit = document.createElement("button");
   btnEdit.innerText = "Edit";
+  btnEdit.dataset.time = seconds;
   const marking = document.createElement("li");
   const time = document.createElement("p");
   time.className = "time";

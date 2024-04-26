@@ -4,7 +4,7 @@
   "name": "Notes With Timestamp",
   "version": "1.0",
   "sidebar_action": {
-    "default_title": "Notes with Timestamp",
+    "default_title": "Notes With Timestamp",
     "default_panel": "sidebar/panel.html"
   },
   "permissions": ["storage", "tabs"],
