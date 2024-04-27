@@ -41,9 +41,8 @@ button{
   padding-left:0px;
   color: white;
   font-size: 15px;
-  width: 400px;
-  height: 90vh;
   overflow: auto;
-  margin-bottom: 5px;
-  font-family: Roboto, Arial, sans-serif
+  margin:0px;
+  font-family: Roboto, Arial, sans-serif;
+  padding: 5px;
 }
