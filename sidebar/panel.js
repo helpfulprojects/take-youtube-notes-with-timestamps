@@ -35,14 +35,27 @@ markingsHtml.addEventListener("mousedown", (event) => {
 });
 
 currentMarkingHtml.addEventListener("keydown", (event) => {
-  previousInputLength = event.target.value.length;
-});
-currentMarkingHtml.addEventListener("keyup", (event) => {
-  const startWritingMarking =
-    event.target.value.length === 1 && previousInputLength == 0;
-  if (startWritingMarking) {
+  let keycode = event.keyCode;
+  let valid =
+    (keycode > 47 && keycode < 58) || // number keys
+    keycode == 32 ||
+    keycode == 13 || // spacebar & return key(s) (if you want to allow carriage returns)
+    (keycode > 64 && keycode < 91) || // letter keys
+    (keycode > 95 && keycode < 112) || // numpad keys
+    (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+    (keycode > 218 && keycode < 223); // [\]' (in order)
+  let selectionLength = event.target.value.substring(
+    event.target.selectionStart,
+    event.target.selectionEnd
+  ).length;
+  if (
+    (event.target.value.length === 0 && valid) ||
+    (event.target.value.length == selectionLength && valid)
+  ) {
     updateTimeStarted();
   }
+});
+currentMarkingHtml.addEventListener("keyup", (event) => {
   if (event.key === "Enter") {
     if (
       currentMarkingHtml.value === "" ||
@@ -65,7 +78,6 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
     updateMarkingsHtml();
     updateLocalStorage();
     currentMarkingHtml.value = "";
-    previousInputLength = 0;
     timeStartWritingMarking = INVALID_START_TIME;
   }
 });
