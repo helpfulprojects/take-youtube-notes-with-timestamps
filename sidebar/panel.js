@@ -79,6 +79,19 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
     updateLocalStorage();
     currentMarkingHtml.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
+  } else if (event.ctrlKey && event.which == 69) {
+    browser.storage.local.get().then((res) => {
+      var dataStr =
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(JSON.stringify(res));
+      var dlAnchorElem = document.createElement("a");
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute(
+        "download",
+        "notesTimestampsExtensionData.json"
+      );
+      dlAnchorElem.click();
+    });
   }
 });
 
