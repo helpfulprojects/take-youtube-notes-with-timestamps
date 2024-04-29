@@ -1,6 +1,7 @@
 let myWindowId;
 const currentMarkingHtml = document.querySelector("#currentMark");
 const markingsHtml = document.querySelector("#markings");
+const progressContainer = document.querySelector("#progressContainer");
 let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
@@ -31,6 +32,21 @@ markingsHtml.addEventListener("mousedown", (event) => {
       }
     });
     return;
+  } else if (
+    event.which === 1 &&
+    event.target.className === "canExplainCheckbox"
+  ) {
+    event.preventDefault();
+    event.target.checked = !event.target.checked;
+    let canExplain = event.target.checked;
+    let time = parseFloat(event.target.dataset.time);
+    markings.forEach((marking) => {
+      if (marking.time == time) {
+        marking.canExplain = canExplain;
+      }
+    });
+    updateMarkingsHtml();
+    updateLocalStorage();
   }
 });
 
@@ -63,6 +79,7 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
     )
       return;
     markings.push({
+      canExplain: false,
       title: currentMarkingHtml.value,
       time: timeStartWritingMarking,
     });
@@ -108,7 +125,6 @@ function updateTimeStarted() {
     browser.tabs
       .sendMessage(tabs[0].id, { action: "getTime" })
       .then((response) => {
-        console.log("Got response", response);
         timeStartWritingMarking = parseFloat(response.time);
       });
   });
@@ -120,7 +136,12 @@ function setVideoTime(seconds) {
   });
 }
 
-function createMarking(value, seconds) {
+function createMarking(value, seconds, canExplain) {
+  var checkbox = document.createElement("INPUT");
+  checkbox.checked = canExplain;
+  checkbox.setAttribute("type", "checkbox");
+  checkbox.className = "canExplainCheckbox";
+  checkbox.dataset.time = seconds;
   const marking = document.createElement("li");
   const time = document.createElement("p");
   time.className = "time";
@@ -132,6 +153,7 @@ function createMarking(value, seconds) {
   title.className = "title";
   title.innerText = value;
   title.dataset.time = seconds;
+  marking.appendChild(checkbox);
   marking.appendChild(time);
   marking.appendChild(title);
   return marking;
@@ -145,6 +167,7 @@ function updateContent() {
     })
     .then((storedInfo) => {
       markingsHtml.innerHTML = "";
+      markings = [];
       if (!storedInfo[Object.keys(storedInfo)[0]]) return;
       markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
       updateMarkingsHtml();
@@ -152,9 +175,24 @@ function updateContent() {
 }
 
 function updateMarkingsHtml() {
+  progressContainer.innerHTML = "";
+  const progressHtml = document.createElement("progress");
+  progressHtml.setAttribute("max", markings.length);
+  let learnedNotes = 0;
+  markings.forEach((marking) => {
+    if (marking.canExplain) {
+      learnedNotes++;
+    }
+  });
+  progressHtml.setAttribute("value", learnedNotes);
+  progressContainer.appendChild(progressHtml);
   markingsHtml.innerHTML = "";
   markings.forEach((marking) => {
-    const markingHtml = createMarking(marking.title, marking.time);
+    const markingHtml = createMarking(
+      marking.title,
+      marking.time,
+      marking.canExplain
+    );
     markingsHtml.appendChild(markingHtml);
   });
 }

@@ -46,3 +46,7 @@ button{
   font-family: Roboto, Arial, sans-serif;
   padding: 5px;
 }
+
+progress{
+  min-width: 100%;
+}
