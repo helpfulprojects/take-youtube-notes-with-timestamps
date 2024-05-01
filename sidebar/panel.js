@@ -2,10 +2,22 @@ let myWindowId;
 const currentMarkingHtml = document.querySelector("#currentMark");
 const markingsHtml = document.querySelector("#markings");
 const progressContainer = document.querySelector("#progressContainer");
+const importNotes = document.querySelector("#importNotes");
 let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
+
+importNotes.addEventListener("change", (event) => {
+  if (importNotes.files.length == 1) {
+    var reader = new FileReader();
+    reader.readAsText(importNotes.files[0], "UTF-8");
+    reader.onload = function (evt) {
+      let importJson = JSON.parse(evt.target.result);
+      browser.storage.local.set(importJson);
+    };
+  }
+});
 
 markingsHtml.addEventListener("mousedown", (event) => {
   if (event.which === 1 && event.target.className === "title") {
@@ -97,6 +109,7 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
     currentMarkingHtml.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
   } else if (event.ctrlKey && event.which == 69) {
+    //ctrl + e
     browser.storage.local.get().then((res) => {
       var dataStr =
         "data:text/json;charset=utf-8," +
@@ -109,13 +122,28 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
       );
       dlAnchorElem.click();
     });
+  } else if (event.ctrlKey && event.which == 90) {
+    //ctrl + z
+    importNotes.click();
   }
 });
+
+function getVideoId(url) {
+  if (!url.includes("v=")) return "";
+  let video_id = url.split("v=")[1];
+  let ampersandPosition = video_id.indexOf("&");
+  if (ampersandPosition != -1) {
+    video_id = video_id.substring(0, ampersandPosition);
+  }
+  return video_id;
+}
 
 function updateLocalStorage() {
   browser.tabs.query({ windowId: myWindowId, active: true }).then((tabs) => {
     let contentToStore = {};
-    contentToStore[tabs[0].url] = JSON.stringify(markings);
+    let url = tabs[0].url;
+    let videoId = getVideoId(url);
+    contentToStore[videoId] = JSON.stringify(markings);
     browser.storage.local.set(contentToStore);
   });
 }
@@ -163,7 +191,9 @@ function updateContent() {
   browser.tabs
     .query({ windowId: myWindowId, active: true })
     .then((tabs) => {
-      return browser.storage.local.get(tabs[0].url);
+      let url = tabs[0].url;
+      let videoId = getVideoId(url);
+      return browser.storage.local.get(videoId);
     })
     .then((storedInfo) => {
       markingsHtml.innerHTML = "";
