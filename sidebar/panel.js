@@ -122,18 +122,22 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
       );
       dlAnchorElem.click();
     });
-  } else if (event.ctrlKey && event.which == 90) {
+  } else if (event.shiftKey && event.ctrlKey && event.which == 90) {
     //ctrl + z
     importNotes.click();
   }
 });
 
 function getVideoId(url) {
-  if (!url.includes("v=")) return "";
-  let video_id = url.split("v=")[1];
-  let ampersandPosition = video_id.indexOf("&");
-  if (ampersandPosition != -1) {
-    video_id = video_id.substring(0, ampersandPosition);
+  let video_id = "";
+  if (url.includes("file://")) {
+    video_id = url.replace(/^.*[\\/]/, "");
+  } else if (url.includes("v=")) {
+    video_id = url.split("v=")[1];
+    let ampersandPosition = video_id.indexOf("&");
+    if (ampersandPosition != -1) {
+      video_id = video_id.substring(0, ampersandPosition);
+    }
   }
   return video_id;
 }
