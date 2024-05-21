@@ -18,7 +18,7 @@ li {
 
 .time{
   font-size: 13px;
-  font-weight: lighter;
+  color: rgba(255, 255, 255, 0.5)
 }
 
 .title{
@@ -49,4 +49,8 @@ button{
 
 progress{
   min-width: 100%;
+}
+
+.dimmed{
+  color: rgba(255, 255, 255, 0.5)
 }

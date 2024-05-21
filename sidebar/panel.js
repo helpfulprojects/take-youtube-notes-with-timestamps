@@ -7,6 +7,7 @@ let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
+let currentVideoTime;
 
 importNotes.addEventListener("change", (event) => {
   if (importNotes.files.length == 1) {
@@ -195,7 +196,11 @@ function createMarking(value, seconds, canExplain) {
   let formatedSeconds = date.toISOString().substring(11, 19);
   time.innerText = formatedSeconds + ": ";
   const title = document.createElement("p");
-  title.className = "title";
+  if (currentVideoTime && seconds > currentVideoTime) {
+    title.className = "title dimmed";
+  } else {
+    title.className = "title";
+  }
   title.innerText = value;
   title.dataset.time = seconds;
   marking.appendChild(checkbox);
@@ -203,13 +208,18 @@ function createMarking(value, seconds, canExplain) {
   marking.appendChild(title);
   return marking;
 }
-
 function updateContent() {
   browser.tabs
     .query({ windowId: myWindowId, active: true })
-    .then((tabs) => {
+    .then(async (tabs) => {
       let url = tabs[0].url;
       let videoId = getVideoId(url);
+      if (videoId != "") {
+        let response = await browser.tabs.sendMessage(tabs[0].id, {
+          action: "getTime",
+        });
+        currentVideoTime = parseFloat(response.time);
+      }
       return browser.storage.local.get(videoId);
     })
     .then((storedInfo) => {
