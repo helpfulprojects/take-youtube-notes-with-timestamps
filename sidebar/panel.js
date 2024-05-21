@@ -83,6 +83,14 @@ currentMarkingHtml.addEventListener("keydown", (event) => {
     updateTimeStarted();
   }
 });
+function arraySorting(arr) {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[0].value < arr[i].value) {
+      return 1;
+    }
+  }
+  return -1;
+}
 currentMarkingHtml.addEventListener("keyup", (event) => {
   if (event.key === "Enter") {
     if (
@@ -90,16 +98,19 @@ currentMarkingHtml.addEventListener("keyup", (event) => {
       timeStartWritingMarking === INVALID_START_TIME
     )
       return;
-    markings.push({
+    if (arraySorting(markings) > 0) {
+      markings = markings.reverse();
+    }
+    markings.unshift({
       canExplain: false,
       title: currentMarkingHtml.value,
       time: timeStartWritingMarking,
     });
     markings.sort(function (x, y) {
-      if (x.time < y.time) {
+      if (x.time > y.time) {
         return -1;
       }
-      if (x.time > y.time) {
+      if (x.time < y.time) {
         return 1;
       }
       return 0;
