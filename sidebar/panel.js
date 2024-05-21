@@ -132,12 +132,14 @@ function getVideoId(url) {
   let video_id = "";
   if (url.includes("file://")) {
     video_id = url.replace(/^.*[\\/]/, "");
-  } else if (url.includes("v=")) {
+  } else if (url.includes("v=") && url.includes("www.youtube.com")) {
     video_id = url.split("v=")[1];
     let ampersandPosition = video_id.indexOf("&");
     if (ampersandPosition != -1) {
       video_id = video_id.substring(0, ampersandPosition);
     }
+  } else if (url.includes("coaching.healthygamer.gg")) {
+    video_id = url.split("/").slice(-1)[0];
   }
   return video_id;
 }
