@@ -249,6 +249,8 @@ async function updateContent() {
   let url = tabs[0].url;
   let videoId = getVideoId(url);
   if (videoId === "") {
+    markings = [];
+    updateMarkingsHtml();
     return;
   }
   if (previousVideoId != videoId) {
