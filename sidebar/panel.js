@@ -8,6 +8,11 @@ let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
 let currentVideoTime;
+let lastTabId;
+
+function listenForVideoTimeChange() {}
+
+function stopListeningForVideoTimeChange() {}
 
 importNotes.addEventListener("change", (event) => {
   if (importNotes.files.length == 1) {
@@ -21,7 +26,7 @@ importNotes.addEventListener("change", (event) => {
 });
 
 markingsHtml.addEventListener("mousedown", (event) => {
-  if (event.which === 1 && event.target.className === "title") {
+  if (event.which === 1 && event.target.classList.contains("title")) {
     let time = parseFloat(event.target.dataset.time);
     markings.forEach((marking) => {
       if (marking.time == time) {
@@ -38,6 +43,7 @@ markingsHtml.addEventListener("mousedown", (event) => {
           }
         } else {
           let newTime = Math.max(0, marking.time - 5);
+          currentVideoTime = marking.time;
           setVideoTime(newTime);
         }
         updateMarkingsHtml();
@@ -150,7 +156,10 @@ function getVideoId(url) {
     if (ampersandPosition != -1) {
       video_id = video_id.substring(0, ampersandPosition);
     }
-  } else if (url.includes("coaching.healthygamer.gg")) {
+  } else if (
+    url.includes("coaching.healthygamer.gg") &&
+    url.includes("lessons")
+  ) {
     video_id = url.split("/").slice(-1)[0];
   }
   return video_id;
@@ -208,27 +217,30 @@ function createMarking(value, seconds, canExplain) {
   marking.appendChild(title);
   return marking;
 }
-function updateContent() {
-  browser.tabs
-    .query({ windowId: myWindowId, active: true })
-    .then(async (tabs) => {
-      let url = tabs[0].url;
-      let videoId = getVideoId(url);
-      if (videoId != "") {
-        let response = await browser.tabs.sendMessage(tabs[0].id, {
-          action: "getTime",
-        });
-        currentVideoTime = parseFloat(response.time);
-      }
-      return browser.storage.local.get(videoId);
-    })
-    .then((storedInfo) => {
-      markingsHtml.innerHTML = "";
-      markings = [];
-      if (!storedInfo[Object.keys(storedInfo)[0]]) return;
-      markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
-      updateMarkingsHtml();
-    });
+async function updateContent() {
+  let tabs = await browser.tabs.query({
+    windowId: myWindowId,
+    active: true,
+    status: "complete",
+  });
+  if (tabs.length == 0) {
+    return;
+  }
+  let url = tabs[0].url;
+  let videoId = getVideoId(url);
+  if (videoId === "") {
+    return;
+  }
+  let response = await browser.tabs.sendMessage(tabs[0].id, {
+    action: "getTime",
+  });
+  currentVideoTime = parseFloat(response.time);
+  let storedInfo = await browser.storage.local.get(videoId);
+  markingsHtml.innerHTML = "";
+  markings = [];
+  if (!storedInfo[Object.keys(storedInfo)[0]]) return;
+  markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
+  updateMarkingsHtml();
 }
 
 function updateMarkingsHtml() {
