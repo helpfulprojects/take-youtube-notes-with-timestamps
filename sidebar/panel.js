@@ -8,11 +8,9 @@ let previousInputLength = 0;
 const INVALID_START_TIME = -1;
 let timeStartWritingMarking = INVALID_START_TIME;
 let currentVideoTime;
-let lastTabId;
 
-function listenForVideoTimeChange() {}
-
-function stopListeningForVideoTimeChange() {}
+let previousTabId;
+let previousVideoId;
 
 importNotes.addEventListener("change", (event) => {
   if (importNotes.files.length == 1) {
@@ -43,7 +41,6 @@ markingsHtml.addEventListener("mousedown", (event) => {
           }
         } else {
           let newTime = Math.max(0, marking.time - 5);
-          currentVideoTime = marking.time;
           setVideoTime(newTime);
         }
         updateMarkingsHtml();
@@ -217,6 +214,23 @@ function createMarking(value, seconds, canExplain) {
   marking.appendChild(title);
   return marking;
 }
+
+async function startTabVideoListen(tabId) {
+  try {
+    await browser.tabs.sendMessage(tabId, {
+      action: "sendTimeUpdates",
+    });
+  } catch (e) {}
+}
+
+async function endTabVideoListen(tabId) {
+  try {
+    await browser.tabs.sendMessage(tabId, {
+      action: "stopTimeUpdates",
+    });
+  } catch (e) {}
+}
+
 async function updateContent() {
   let tabs = await browser.tabs.query({
     windowId: myWindowId,
@@ -226,15 +240,21 @@ async function updateContent() {
   if (tabs.length == 0) {
     return;
   }
+  let currentTabId = tabs[0].id;
+  if (previousTabId != currentTabId) {
+    await endTabVideoListen(previousTabId);
+    await startTabVideoListen(currentTabId);
+    previousTabId = currentTabId;
+  }
   let url = tabs[0].url;
   let videoId = getVideoId(url);
   if (videoId === "") {
     return;
   }
-  let response = await browser.tabs.sendMessage(tabs[0].id, {
-    action: "getTime",
-  });
-  currentVideoTime = parseFloat(response.time);
+  if (previousVideoId != videoId) {
+    await startTabVideoListen(currentTabId);
+    previousVideoId = videoId;
+  }
   let storedInfo = await browser.storage.local.get(videoId);
   markingsHtml.innerHTML = "";
   markings = [];
@@ -274,3 +294,12 @@ browser.windows.getCurrent({ populate: true }).then((windowInfo) => {
   myWindowId = windowInfo.id;
   updateContent();
 });
+
+browser.runtime.onMessage.addListener(handleMessage);
+
+function handleMessage(request, sender, sendResponse) {
+  if (request.action === "syncTime") {
+    currentVideoTime = parseFloat(request.value);
+    updateMarkingsHtml();
+  }
+}
