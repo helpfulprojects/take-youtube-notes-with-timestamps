@@ -2,7 +2,7 @@
   "description": "Personal extension for taking notes on YouTube videos",
   "manifest_version": 2,
   "name": "Notes With Timestamp",
-  "version": "1.6",
+  "version": "1.7",
   "sidebar_action": {
     "default_title": "Notes With Timestamp",
     "default_panel": "sidebar/panel.html"

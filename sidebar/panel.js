@@ -95,13 +95,29 @@ function arraySorting(arr) {
   }
   return -1;
 }
-currentMarkingHtml.addEventListener("keyup", (event) => {
+currentMarkingHtml.addEventListener("keyup", async (event) => {
   if (event.key === "Enter") {
     if (
       currentMarkingHtml.value === "" ||
       timeStartWritingMarking === INVALID_START_TIME
     )
       return;
+    if (event.ctrlKey) {
+      let id = currentMarkingHtml.value;
+      let storedInfo = await browser.storage.local.get(id);
+      if (!storedInfo[Object.keys(storedInfo)[0]]) return;
+      let shouldCopy = confirm(
+        "Are you sure you want to copy: " +
+          storedInfo[Object.keys(storedInfo)[0]].slice(0, 2000)
+      );
+      if (!shouldCopy) return;
+      markingsHtml.innerHTML = "";
+      markings = [];
+      markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
+      updateMarkingsHtml();
+      updateLocalStorage();
+      return;
+    }
     if (arraySorting(markings) > 0) {
       markings = markings.reverse();
     }
@@ -209,7 +225,7 @@ function createMarking(value, seconds, canExplain) {
   }
   title.innerText = value;
   title.dataset.time = seconds;
-  marking.appendChild(checkbox);
+  //marking.appendChild(checkbox);
   marking.appendChild(time);
   marking.appendChild(title);
   return marking;
@@ -276,7 +292,7 @@ function updateMarkingsHtml() {
     }
   });
   progressHtml.setAttribute("value", learnedNotes);
-  progressContainer.appendChild(progressHtml);
+  //progressContainer.appendChild(progressHtml);
   markingsHtml.innerHTML = "";
   markings.forEach((marking) => {
     const markingHtml = createMarking(
