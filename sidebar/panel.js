@@ -3,6 +3,9 @@ const currentMarkingHtml = document.querySelector("#currentMark");
 const markingsHtml = document.querySelector("#markings");
 const progressContainer = document.querySelector("#progressContainer");
 const importNotes = document.querySelector("#importNotes");
+const exportBtn = document.querySelector("#exportBtn");
+const importBtn = document.querySelector("#importBtn");
+const copyBtn = document.querySelector("#copyBtn");
 let markings = [];
 let previousInputLength = 0;
 const INVALID_START_TIME = -1;
@@ -21,6 +24,35 @@ importNotes.addEventListener("change", (event) => {
       browser.storage.local.set(importJson);
     };
   }
+});
+
+exportBtn.addEventListener("mousedown", (event) => {
+  browser.storage.local.get().then((res) => {
+    var dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res));
+    var dlAnchorElem = document.createElement("a");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "notesTimestampsExtensionData.json");
+    dlAnchorElem.click();
+  });
+});
+importBtn.addEventListener("mousedown", (event) => {
+  importNotes.click();
+});
+copyBtn.addEventListener("mousedown", async (event) => {
+  let id = currentMarkingHtml.value;
+  let storedInfo = await browser.storage.local.get(id);
+  if (!storedInfo[Object.keys(storedInfo)[0]]) return;
+  let shouldCopy = confirm(
+    "Are you sure you want to copy: " +
+      storedInfo[Object.keys(storedInfo)[0]].slice(0, 2000)
+  );
+  if (!shouldCopy) return;
+  markingsHtml.innerHTML = "";
+  markings = [];
+  markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
+  updateMarkingsHtml();
+  updateLocalStorage();
 });
 
 markingsHtml.addEventListener("mousedown", (event) => {
@@ -102,22 +134,6 @@ currentMarkingHtml.addEventListener("keyup", async (event) => {
       timeStartWritingMarking === INVALID_START_TIME
     )
       return;
-    if (event.ctrlKey) {
-      let id = currentMarkingHtml.value;
-      let storedInfo = await browser.storage.local.get(id);
-      if (!storedInfo[Object.keys(storedInfo)[0]]) return;
-      let shouldCopy = confirm(
-        "Are you sure you want to copy: " +
-          storedInfo[Object.keys(storedInfo)[0]].slice(0, 2000)
-      );
-      if (!shouldCopy) return;
-      markingsHtml.innerHTML = "";
-      markings = [];
-      markings = JSON.parse(storedInfo[Object.keys(storedInfo)[0]]);
-      updateMarkingsHtml();
-      updateLocalStorage();
-      return;
-    }
     if (arraySorting(markings) > 0) {
       markings = markings.reverse();
     }
@@ -139,28 +155,11 @@ currentMarkingHtml.addEventListener("keyup", async (event) => {
     updateLocalStorage();
     currentMarkingHtml.value = "";
     timeStartWritingMarking = INVALID_START_TIME;
-  } else if (event.ctrlKey && event.which == 69) {
-    //ctrl + e
-    browser.storage.local.get().then((res) => {
-      var dataStr =
-        "data:text/json;charset=utf-8," +
-        encodeURIComponent(JSON.stringify(res));
-      var dlAnchorElem = document.createElement("a");
-      dlAnchorElem.setAttribute("href", dataStr);
-      dlAnchorElem.setAttribute(
-        "download",
-        "notesTimestampsExtensionData.json"
-      );
-      dlAnchorElem.click();
-    });
-  } else if (event.shiftKey && event.ctrlKey && event.which == 90) {
-    //ctrl + z
-    importNotes.click();
   }
 });
 
 function getVideoId(url) {
-  let video_id = "";
+  let video_id = url;
   if (url.includes("file://")) {
     video_id = url.replace(/^.*[\\/]/, "");
   } else if (url.includes("v=") && url.includes("www.youtube.com")) {
@@ -225,7 +224,7 @@ function createMarking(value, seconds, canExplain) {
   }
   title.innerText = value;
   title.dataset.time = seconds;
-  //marking.appendChild(checkbox);
+  marking.appendChild(checkbox);
   marking.appendChild(time);
   marking.appendChild(title);
   return marking;
@@ -248,6 +247,7 @@ async function endTabVideoListen(tabId) {
 }
 
 async function updateContent() {
+  console.log("update content");
   let tabs = await browser.tabs.query({
     windowId: myWindowId,
     active: true,

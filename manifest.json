@@ -2,7 +2,7 @@
   "description": "Personal extension for taking notes on YouTube videos",
   "manifest_version": 2,
   "name": "Notes With Timestamp",
-  "version": "1.7",
+  "version": "1.9",
   "sidebar_action": {
     "default_title": "Notes With Timestamp",
     "default_panel": "sidebar/panel.html"
@@ -13,6 +13,7 @@
       "matches": [
         "*://*.youtube.com/*",
         "*://coaching.healthygamer.gg/*",
+        "<all_urls>",
         "file:///*"
       ],
       "js": ["content_script.js"]
